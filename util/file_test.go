@@ -12,7 +12,7 @@ func TestReadUserFormExcel(t *testing.T) {
 
 	u, err := ReadUserInfoFromExcel(path)
 	if err != *errno.OK {
-		log.Sugar().Infof("{}", err.Message)
+		log.Sugar().Infof("{%s}", err.Message)
 	}
 
 	for _, uu := range u {
