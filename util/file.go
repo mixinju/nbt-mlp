@@ -19,7 +19,12 @@ func ReadUserInfoFromExcel(filePath string) ([]model.User, errno.Errno) {
 	if err != nil {
 		return nil, *errno.ErrFileOpen
 	}
-	defer f.Close()
+	defer func(f *excelize.File) {
+		err := f.Close()
+		if err != nil {
+			log.Sugar().Errorf("关闭文件失败: %v", err)
+		}
+	}(f)
 
 	// Read the rows from the first sheet
 	rows, err := f.GetRows(f.GetSheetName(0))
@@ -36,9 +41,9 @@ func ReadUserInfoFromExcel(filePath string) ([]model.User, errno.Errno) {
 
 	result := make([]model.User, 0, len(rows)-1)
 	for index, row := range rows {
-		u, e := resoloveUser(row, index)
+		u, e := resolveUser(row, index)
 		if e != nil {
-			log.Sugar().Errorf("解析单个用户信息失败:文件路径{};原始数据 {};错误信息:{}", filePath, row, e.Error())
+			log.Sugar().Errorf("解析单个用户信息失败:文件路径{%s};原始数据 {%s};错误信息:{%s}", filePath, row, e.Error())
 		}
 		result = append(result, u)
 	}
@@ -46,7 +51,7 @@ func ReadUserInfoFromExcel(filePath string) ([]model.User, errno.Errno) {
 	return result, *errno.OK
 }
 
-func resoloveUser(row []string, rowNum int) (model.User, error) {
+func resolveUser(row []string, rowNum int) (model.User, error) {
 	var u model.User
 	className := row[0]
 	name := row[2]
@@ -60,7 +65,7 @@ func resoloveUser(row []string, rowNum int) (model.User, error) {
 		return u, fmt.Errorf("行号:{%d};错误信息:{%s}", rowNum, "学号转换失败")
 	}
 
-	u.Id = id
+	u.ID = id
 	u.ClassName = className
 	u.Name = name
 

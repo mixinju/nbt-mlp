@@ -10,7 +10,7 @@ import (
 
 var DB *gorm.DB
 
-var LOG, _ = zap.NewProduction()
+var logger, _ = zap.NewProduction()
 
 func InitDB() {
 	dsn := "root:123456@tcp(127.0.0.1:3306)/nbt_mlp?charset=utf8mb4&parseTime=True&loc=Local"
@@ -19,18 +19,18 @@ func InitDB() {
 		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 	if err != nil {
-		LOG.Sugar().Fatalf("failed to connect database: %v", err)
+		logger.Sugar().Fatalf("failed to connect database: %v", err)
 	}
 
 	// Perform automatic migration
 	err = DB.AutoMigrate(&model.User{}, &model.Host{}, &model.Container{}, &model.AccessGroup{})
 	if err != nil {
-		LOG.Sugar().Fatalf("failed to migrate database: %v", err)
+		logger.Sugar().Fatalf("failed to migrate database: %v", err)
 	}
 
 	sqlDb, err := DB.DB()
 	if err != nil {
-		LOG.Sugar().Fatalf("failed to get db: %v", err)
+		logger.Sugar().Fatalf("failed to get db: %v", err)
 	}
 
 	sqlDb.SetMaxIdleConns(10)
