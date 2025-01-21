@@ -9,9 +9,6 @@ import (
 
     "nbt-mlp/common/util"
     "nbt-mlp/common/util/errno"
-    "nbt-mlp/dao"
-    "nbt-mlp/domain/model"
-    "nbt-mlp/middleware"
 
     "github.com/mozillazg/go-pinyin"
 
