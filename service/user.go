@@ -7,12 +7,11 @@ import (
     "strings"
     "sync"
 
+    "nbt-mlp/common/util"
+    "nbt-mlp/common/util/errno"
     "nbt-mlp/dao"
+    "nbt-mlp/domain/model"
     "nbt-mlp/middleware"
-    "nbt-mlp/util"
-    "nbt-mlp/util/errno"
-
-    "nbt-mlp/dao/model"
 
     "github.com/mozillazg/go-pinyin"
 
@@ -32,7 +31,7 @@ func Login(userId uint64, password string) (string, errno.Errno) {
         return "", errno.Errno{}
     }
 
-    ok := util.ComparePassword(u.Password, hashPassword)
+    ok := util.ComparePassword(model.User{}.Password, hashPassword)
     if !ok {
         return "", *errno.ErrPasswordIncorrect
     }
@@ -133,10 +132,7 @@ func ModifyPassWord(userId uint64, oldPassWord string, newPassWord string) errno
     u.Password = hashPassword
     ok = dao.GetUserDaoInstance().Update(u)
     if !ok {
-        logger.Error("Update user password failed",
-            zap.String("userId", strconv.FormatUint(u.ID, 10)),
-            zap.String("userName", u.Name),
-        )
+        logger.Error("update user password failed", zap.Uint64("userId", u.ID), zap.String("userName", u.Name))
     }
     return *errno.OK
 

@@ -1,0 +1,37 @@
+package persistence
+
+import (
+    "go.uber.org/zap"
+    "gorm.io/driver/mysql"
+    "gorm.io/gorm"
+    "nbt-mlp/domain/entity"
+)
+
+var DB *gorm.DB
+
+var logger, _ = zap.NewProduction()
+
+func InitDB() {
+    dsn := "root:123456@tcp(127.0.0.1:3306)/nbt_mlp?charset=utf8mb4&parseTime=True&loc=Local"
+    var err error
+    DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+        DisableForeignKeyConstraintWhenMigrating: true,
+    })
+    if err != nil {
+        logger.Sugar().Fatalf("failed to connect database: %v", err)
+    }
+
+    // Perform automatic migration
+    err = DB.AutoMigrate(&entity.User{}, &entity.Host{}, &entity.Container{}, &entity.AccessGroup{})
+    if err != nil {
+        logger.Sugar().Fatalf("failed to migrate database: %v", err)
+    }
+
+    sqlDb, err := DB.DB()
+    if err != nil {
+        logger.Sugar().Fatalf("failed to get db: %v", err)
+    }
+
+    sqlDb.SetMaxIdleConns(10)
+    sqlDb.SetMaxOpenConns(100)
+}
