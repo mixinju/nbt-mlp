@@ -1,4 +1,4 @@
-package contorller
+package api
 
 import "fmt"
 
@@ -7,5 +7,5 @@ import "fmt"
 // InitUserPassword 管理员使用,一键初始化密码
 func InitUserPassword(id uint64) {
 
-	fmt.Println("InitUserPassword")
+    fmt.Println("InitUserPassword")
 }

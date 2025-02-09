@@ -1,4 +1,4 @@
-package util
+package api
 
 import "nbt-mlp/common/util/errno"
 
