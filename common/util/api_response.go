@@ -1,6 +1,6 @@
-package result
+package util
 
-import "nbt-mlp/util/errno"
+import "nbt-mlp/common/util/errno"
 
 type Response struct {
     Code    int         `json:"code"`

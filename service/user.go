@@ -9,6 +9,7 @@ import (
 
     "nbt-mlp/common/util"
     "nbt-mlp/common/util/errno"
+    "nbt-mlp/domain/entity"
 
     "github.com/mozillazg/go-pinyin"
 
@@ -88,14 +89,14 @@ func flattenPinyin(p [][]string) string {
 
 // BatchRegister 批量注册
 
-func BatchRegister(users []model.User) {
+func BatchRegister(users []entity.User) {
     var wg sync.WaitGroup
     var mu sync.Mutex
-    var failedUsers []model.User
+    var failedUsers []entity.User
 
     wg.Add(len(users))
     for _, user := range users {
-        go func(user model.User) {
+        go func(user entity.User) {
             defer wg.Done()
             err := Register(user)
             if err != nil {
