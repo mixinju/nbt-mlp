@@ -5,14 +5,12 @@ import (
     "os"
     "path/filepath"
 
+    "github.com/gin-gonic/gin"
     "go.uber.org/zap"
     "nbt-mlp/Infrastructure/authorization"
     "nbt-mlp/application"
     "nbt-mlp/common/util"
     "nbt-mlp/common/util/errno"
-    "nbt-mlp/service"
-
-    "github.com/gin-gonic/gin"
 )
 
 var logger, _ = zap.NewProduction()
@@ -20,6 +18,13 @@ var logger, _ = zap.NewProduction()
 type User struct {
     auth authorization.AuthIface
     ua   application.UserAppIface
+}
+
+func NewUser() *User {
+    return &User{
+        ua:   application.NewUserAppImpl(),
+        auth: authorization.NewAuth(),
+    }
 }
 
 func (u *User) ModifyPassword(c *gin.Context) {
@@ -67,7 +72,7 @@ func (u *User) BatchRegisterByExcelFile(c *gin.Context) {
     }
 
     // 这里不再抛出异常,使用邮箱异步通知方式
-    service.BatchRegister(userList)
+    u.ua.BatchSave(userList)
 
     // 移除上传的文件
     if err := os.Remove(filePath); err != nil {
