@@ -23,7 +23,7 @@ type User struct {
 func NewUser() *User {
     return &User{
         ua:   application.NewUserAppImpl(),
-        auth: authorization.NewAuth(),
+        auth: authorization.NewAuthImpl(),
     }
 }
 
@@ -104,7 +104,7 @@ func (u *User) Login(c *gin.Context) {
 
     _, err := u.ua.QueryUserByIdAndPassword(param.UserID, param.Password)
     if err != nil {
-        c.JSON(http.StatusOK, Error(errno.ErrPasswordNotMatch))
+        c.JSON(http.StatusOK, Error(err))
     }
 
     token, err := u.auth.SetUpToken(param.UserID)

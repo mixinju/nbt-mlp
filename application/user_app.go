@@ -52,12 +52,14 @@ func (u *UserAppImpl) QueryUserByIdAndPassword(id uint64, password string) (enti
     if errors.Is(err, gorm.ErrRecordNotFound) {
         return entity.User{}, errno.ErrUserNotFound
     }
+
     hashPassword, _ := util.HashPassword(password)
-    if util.ComparePassword(user.Password, hashPassword) {
-        return user, nil
+
+    if !util.ComparePassword(user.Password, hashPassword) {
+        return entity.User{}, errno.ErrPasswordNotMatch
     }
 
-    return entity.User{}, errno.ErrPasswordNotMatch
+    return user, nil
 
 }
 

@@ -15,6 +15,9 @@ import (
     "k8s.io/client-go/tools/clientcmd"
     "k8s.io/client-go/util/homedir"
     "k8s.io/client-go/util/retry"
+    "nbt-mlp/interfaces"
+    "nbt-mlp/interfaces/api"
+
     //
     // Uncomment to load all auth plugins
     // _ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -146,7 +149,8 @@ func K8s() {
     fmt.Println("Deleted deployment.")
 }
 func main() {
-
+    u := api.NewUser()
+    interfaces.Router(u)
 }
 
 func prompt() {

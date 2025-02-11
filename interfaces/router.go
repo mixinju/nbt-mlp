@@ -5,7 +5,7 @@ import (
     "nbt-mlp/interfaces/api"
 )
 
-func Router(u api.User) *gin.Engine {
+func Router(u *api.User) *gin.Engine {
 
     e := gin.Default()
     e.POST("/user/batch/register", u.BatchRegisterByExcelFile)

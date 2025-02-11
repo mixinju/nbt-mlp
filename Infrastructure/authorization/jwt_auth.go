@@ -22,7 +22,7 @@ type AuthImpl struct {
 
 var _ AuthIface = &AuthImpl{}
 
-func NewAuth() AuthIface {
+func NewAuthImpl() AuthIface {
     return &AuthImpl{}
 }
 func (a *AuthImpl) SetUpToken(userID uint64) (string, *errno.Errno) {
