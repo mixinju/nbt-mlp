@@ -102,6 +102,7 @@ func (u *User) Login(c *gin.Context) {
         return
     }
 
+    // 明文密码
     _, err := u.ua.QueryUserByIdAndPassword(param.UserID, param.Password)
     if err != nil {
         c.JSON(http.StatusOK, Error(err))

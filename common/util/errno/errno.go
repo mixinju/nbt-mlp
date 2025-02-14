@@ -17,6 +17,7 @@ var (
     // User errors
     ErrUserNotFound      = &Errno{Code: 20001, Message: "User not found"}
     ErrPasswordIncorrect = &Errno{Code: 20002, Message: "Password is incorrect"}
+    ErrUserParamsInvalid = &Errno{Code: 20003, Message: "用户参数不合法"}
 
     // ErrFileUpload File errors
     ErrFileUpload       = &Errno{Code: 30001, Message: "File upload error"}

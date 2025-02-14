@@ -1,6 +1,7 @@
 package entity
 
 import (
+    "fmt"
     "time"
 )
 
@@ -42,6 +43,7 @@ type AccessGroup struct {
 type Container struct {
     ID              uint64 `gorm:"primaryKey"`       // 容器ID
     PodName         string `gorm:"type:varchar(20)"` // k8s集群中的 podId
+    Image           string `gorm:"type:varchar(50)"` // 容器镜像
     HostID          uint64 `gorm:"not null"`         // 一个容器属于一个物理机器
     UserID          uint64 `gorm:"not null"`         // 一个容器属于一个用户
     PersistencePath string `gorm:"type:varchar(50)"` // 持久化目录挂载地址
@@ -57,4 +59,20 @@ type LogRecord struct {
     Info       string    `gorm:"type:varchar(100)"`                  // 日志信息
     CreatedAt  time.Time `gorm:"default:current_timestamp;not null"` // 创建时间
     OperatorID uint64    `gorm:"not null"`                           // 操作者ID
+}
+
+func (u *User) Check() error {
+    if len(u.Name) == 0 || len(u.Name) > 20 {
+        return fmt.Errorf("name must be between 1 and 20 characters")
+    }
+    if len(u.Password) == 0 || len(u.Password) > 64 {
+        return fmt.Errorf("password must be between 1 and 64 characters")
+    }
+    if u.Grade < 20 {
+        return fmt.Errorf("grade must be 20 or higher")
+    }
+    if len(u.ClassName) > 20 {
+        return fmt.Errorf("ClassName must be 20 characters or less")
+    }
+    return nil
 }

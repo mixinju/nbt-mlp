@@ -36,7 +36,7 @@ type UserAppImpl struct {
 }
 
 func NewUserAppImpl() UserAppIface {
-    return &UserAppImpl{userRepo: &persistence.UserDao{}}
+    return &UserAppImpl{userRepo: persistence.NewUserDao()}
 }
 
 var _ UserAppIface = &UserAppImpl{}
@@ -46,6 +46,7 @@ func (u *UserAppImpl) Delete(id uint64) *errno.Errno {
     panic("implement me")
 }
 
+// QueryUserByIdAndPassword 注意传递的明文密码
 func (u *UserAppImpl) QueryUserByIdAndPassword(id uint64, password string) (entity.User, *errno.Errno) {
     user, err := u.userRepo.Query(id)
 
@@ -53,9 +54,7 @@ func (u *UserAppImpl) QueryUserByIdAndPassword(id uint64, password string) (enti
         return entity.User{}, errno.ErrUserNotFound
     }
 
-    hashPassword, _ := util.HashPassword(password)
-
-    if !util.ComparePassword(user.Password, hashPassword) {
+    if !util.ComparePassword(user.Password, password) {
         return entity.User{}, errno.ErrPasswordNotMatch
     }
 
@@ -73,14 +72,34 @@ func (u *UserAppImpl) Query(id uint64) (entity.User, *errno.Errno) {
 //    panic("implement me")
 //}
 
-func (u *UserAppImpl) QueryUsers(id []uint64) ([]entity.User, *errno.Errno) {
-    //TODO implement me
-    panic("implement me")
+func (u *UserAppImpl) QueryUsers(ids []uint64) ([]entity.User, *errno.Errno) {
+    users, err := u.userRepo.QueryUsers(ids)
+    if err != nil {
+        return nil, errno.ErrDatabase
+    }
+    return users, nil
 }
 
 func (u *UserAppImpl) Update(ut entity.User) *errno.Errno {
-    //TODO implement me
-    panic("implement me")
+    // 检查用户是否存在
+    _, err := u.userRepo.Query(ut.ID)
+    if errors.Is(err, gorm.ErrRecordNotFound) {
+        return errno.ErrUserNotFound
+    }
+
+    err = ut.Check()
+    if err != nil {
+        return errno.ErrUserParamsInvalid
+    }
+
+    // 更新用户
+    err = u.userRepo.Update(ut)
+    if err != nil {
+        log.Error("Update user failed", zap.String("userId", strconv.FormatUint(ut.ID, 10)))
+        return errno.ErrDatabase
+    }
+
+    return nil
 }
 
 func (u *UserAppImpl) Save(ut entity.User) *errno.Errno {
@@ -96,6 +115,7 @@ func (u *UserAppImpl) Save(ut entity.User) *errno.Errno {
     // 自动生成密码-默认密码:学号添加姓名拼音
     defaultPassword := generateDefaultPassword(ut.ID, ut.Name)
     ut.Password, _ = util.HashPassword(defaultPassword)
+    log.Info("生成默认密码", zap.String("password", ut.Password))
 
     // $2a$10$MBT36F3XF00SxFb5yfnWL.HnOzfys3ccbyktRbNgzz6y1O6llTaNi
     // 如果密码长度不符合要求,则返回错误
@@ -118,6 +138,7 @@ func (u *UserAppImpl) BatchSave(us []entity.User) *errno.Errno {
     var mu sync.Mutex
     var failedUsers []entity.User
 
+    // TODO 直接使用数据的批量插入即可,无需使用协程
     wg.Add(len(us))
     for _, user := range us {
         go func(user entity.User) {
