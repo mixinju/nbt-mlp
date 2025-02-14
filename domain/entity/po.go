@@ -3,6 +3,9 @@ package entity
 import (
     "fmt"
     "time"
+
+    corev1 "k8s.io/api/core/v1"
+    meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // Host 物理主机
@@ -44,6 +47,7 @@ type Container struct {
     ID              uint64 `gorm:"primaryKey"`       // 容器ID
     PodName         string `gorm:"type:varchar(20)"` // k8s集群中的 podId
     Image           string `gorm:"type:varchar(50)"` // 容器镜像
+    NameSpace       string `gorm:"type:varchar(20)"` // k8s集群中的 namespace
     HostID          uint64 `gorm:"not null"`         // 一个容器属于一个物理机器
     UserID          uint64 `gorm:"not null"`         // 一个容器属于一个用户
     PersistencePath string `gorm:"type:varchar(50)"` // 持久化目录挂载地址
@@ -75,4 +79,23 @@ func (u *User) Check() error {
         return fmt.Errorf("ClassName must be 20 characters or less")
     }
     return nil
+}
+
+func (c *Container) ObjectMeta() meta.ObjectMeta {
+    return meta.ObjectMeta{
+        Namespace: c.NameSpace,
+        Name:      c.PodName,
+    }
+}
+
+func (c *Container) PodSpec() corev1.PodSpec {
+    return corev1.PodSpec{
+        Containers: []corev1.Container{
+            {
+                Name:  "main",
+                Image: c.Image,
+            },
+        },
+        RestartPolicy: corev1.RestartPolicyNever,
+    }
 }

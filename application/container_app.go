@@ -4,11 +4,13 @@ import (
     "context"
     "fmt"
 
-    corev1 "k8s.io/api/core/v1"
-    metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+    core "k8s.io/api/core/v1"
+    meta "k8s.io/apimachinery/pkg/apis/meta/v1"
+    "nbt-mlp/Infrastructure/config"
+    "nbt-mlp/domain/entity"
+
     "k8s.io/client-go/kubernetes"
     "k8s.io/client-go/tools/clientcmd"
-    "nbt-mlp/Infrastructure/config"
 )
 
 type ContainerAppIface interface {
@@ -25,31 +27,33 @@ func NewPodApp() *PodApp {
         panic("读取k8s配置文件失败")
     }
     clientSet, err := kubernetes.NewForConfig(k8sConfig)
+    if err != nil {
+        log.Panic("创建pod失败")
+    }
     return &PodApp{clientSet: clientSet}
 }
 
-func (p *PodApp) DeletePod(podId string) {
-    // TODO: implement pod deletion
+func (p *PodApp) DeletePod(c entity.Container) error {
+    err := p.clientSet.
+        CoreV1().
+        Pods(c.NameSpace).
+        Delete(context.Background(), c.PodName, meta.DeleteOptions{})
+    if err != nil {
+        return fmt.Errorf("删除Pod失败: %v", err)
+    }
+    return nil
 }
 
-func (p *PodApp) CreatePod(image string) error {
-    pod := &corev1.Pod{
-        ObjectMeta: metav1.ObjectMeta{
-            Name:      fmt.Sprintf("pod-%s", "sdafds"),
-            Namespace: "default",
-        },
-        Spec: corev1.PodSpec{
-            Containers: []corev1.Container{
-                {
-                    Name:  "main",
-                    Image: image,
-                },
-            },
-            RestartPolicy: corev1.RestartPolicyNever,
-        },
+func (p *PodApp) CreatePod(c entity.Container) error {
+    pod := &core.Pod{
+        ObjectMeta: c.ObjectMeta(),
+        Spec:       c.PodSpec(),
     }
 
-    _, err := p.clientSet.CoreV1().Pods("default").Create(context.Background(), pod, metav1.CreateOptions{})
+    _, err := p.clientSet.
+        CoreV1().
+        Pods(c.NameSpace).
+        Create(context.Background(), pod, meta.CreateOptions{})
     if err != nil {
         return fmt.Errorf("创建Pod失败: %v", err)
     }
