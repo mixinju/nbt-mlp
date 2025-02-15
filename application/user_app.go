@@ -6,16 +6,17 @@ import (
     "strings"
     "sync"
 
-    "github.com/mozillazg/go-pinyin"
-    "github.com/pkg/errors"
-    "github.com/xuri/excelize/v2"
-    "go.uber.org/zap"
-    "gorm.io/gorm"
     "nbt-mlp/Infrastructure/persistence"
     "nbt-mlp/common/util"
     "nbt-mlp/common/util/errno"
     "nbt-mlp/domain/entity"
     "nbt-mlp/domain/repository"
+
+    "github.com/mozillazg/go-pinyin"
+    "github.com/pkg/errors"
+    "github.com/xuri/excelize/v2"
+    "go.uber.org/zap"
+    "gorm.io/gorm"
 )
 
 var log, _ = zap.NewProduction()
@@ -32,6 +33,7 @@ type UserAppIface interface {
 }
 
 type UserAppImpl struct {
+    // 数据库持久化
     userRepo repository.UserRepositoryIface
 }
 
@@ -42,8 +44,20 @@ func NewUserAppImpl() UserAppIface {
 var _ UserAppIface = &UserAppImpl{}
 
 func (u *UserAppImpl) Delete(id uint64) *errno.Errno {
-    //TODO implement me
-    panic("implement me")
+    // Check if user exists
+    _, err := u.userRepo.Query(id)
+    if errors.Is(err, gorm.ErrRecordNotFound) {
+        return errno.ErrUserNotFound
+    }
+
+    // Delete the user
+    err = u.userRepo.Delete(id)
+    if err != nil {
+        log.Error("Delete user failed", zap.String("userId", strconv.FormatUint(id, 10)))
+        return errno.ErrDatabase
+    }
+
+    return nil
 }
 
 // QueryUserByIdAndPassword 注意传递的明文密码
@@ -59,21 +73,22 @@ func (u *UserAppImpl) QueryUserByIdAndPassword(id uint64, password string) (enti
     }
 
     return user, nil
-
 }
 
 func (u *UserAppImpl) Query(id uint64) (entity.User, *errno.Errno) {
-    //TODO implement me
-    panic("implement me")
+    user, err := u.userRepo.Query(id)
+    if errors.Is(err, gorm.ErrRecordNotFound) {
+        return entity.User{}, errno.ErrUserNotFound
+    }
+    if err != nil {
+        return entity.User{}, errno.ErrDatabase
+    }
+    return user, nil
 }
-
-//func (u UserAppImpl) Delete(id uint64) *errno.Errno {
-//    //TODO implement me
-//    panic("implement me")
-//}
 
 func (u *UserAppImpl) QueryUsers(ids []uint64) ([]entity.User, *errno.Errno) {
     users, err := u.userRepo.QueryUsers(ids)
+    // TODO 错误处理有问题
     if err != nil {
         return nil, errno.ErrDatabase
     }
@@ -107,7 +122,6 @@ func (u *UserAppImpl) Save(ut entity.User) *errno.Errno {
     // 这部分放到 entity.User 处理
     if ut.ID == 0 || len(ut.Name) == 0 || len(ut.ClassName) == 0 {
         log.Error("注册用户失败: 缺少必要的参数")
-
     }
 
     // 检查对应的学号是否存在
@@ -155,7 +169,7 @@ func (u *UserAppImpl) BatchSave(us []entity.User) *errno.Errno {
 
     if len(failedUsers) != 0 {
         // TODO: Send email notification
-        //logger.Info("Batch registration failed")
+        // logger.Info("Batch registration failed")
     }
     return nil
 }

@@ -8,4 +8,5 @@ type UserRepositoryIface interface {
     Query(id uint64) (entity.User, error)
     QueryUsers(id []uint64) ([]entity.User, []error)
     Update(u entity.User) error
+    Delete(userId uint64) error
 }

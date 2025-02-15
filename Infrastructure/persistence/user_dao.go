@@ -86,3 +86,11 @@ func (ud *UserDao) Update(u entity.User) error {
 	}
 	return nil
 }
+
+func (ud *UserDao) Delete(userId uint64) error {
+	result := ud.db.Delete(&entity.User{}, userId)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}
