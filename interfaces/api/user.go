@@ -18,12 +18,14 @@ var logger, _ = zap.NewProduction()
 type User struct {
     auth authorization.AuthIface
     ua   application.UserAppIface
+    ca   application.ContainerAppIface
 }
 
 func NewUser() *User {
     return &User{
         ua:   application.NewUserAppImpl(),
         auth: authorization.NewAuthImpl(),
+        ca:   application.NewPodApp(),
     }
 }
 
@@ -115,4 +117,41 @@ func (u *User) Login(c *gin.Context) {
     }
 
     c.JSON(http.StatusOK, Success(Login{UserID: param.UserID, Token: token}))
+}
+
+func (u *User) CreatePod(c *gin.Context) {
+    // 基础校验
+
+    // 忽略错误处理,除非中间件失效
+    userId, _ := util.GetUserId(c)
+
+    // 创建条件校验
+
+    ut, err := u.ua.Query(userId)
+    if err != nil {
+        c.JSON(http.StatusOK, gin.H{})
+        return
+    }
+
+    // 分配计算资源
+
+    // 使用PodApp创建对应的节点
+
+    // 保存节点并保存到数据库
+
+    // 输出日志
+}
+
+func (u *User) DeletePod(c *gin.Context) {
+    // user 基本校验
+
+    // 容器拥有者校验,一般用户只能删除自己创建的容器,管理员删除在管理员处理逻辑中
+
+    // 调用PodApp删除容器
+}
+
+func (u *User) QueryPod(c *gin.Context) {
+    // 查询名下所有的Pod
+
+    //
 }

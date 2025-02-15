@@ -14,7 +14,7 @@ func (admin *Admin) Login(username, password string) (string, error) {
     return "", nil
 }
 
-// QueryPod 查询当前所有正在运行的Pod情况
+// QueryPod 查询当前所有正在运行的Pod情况,分页返回
 func (admin *Admin) QueryPod() error {
     return nil
 }

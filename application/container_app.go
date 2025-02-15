@@ -14,12 +14,15 @@ import (
 )
 
 type ContainerAppIface interface {
-    DeletePod(podId string)
+    DeletePod(c entity.Container) error
+    CreatePod(c entity.Container) error
 }
 
 type PodApp struct {
     clientSet *kubernetes.Clientset
 }
+
+var _ ContainerAppIface = &PodApp{}
 
 func NewPodApp() *PodApp {
     k8sConfig, err := clientcmd.BuildConfigFromFlags("", config.K8ConfigPath)

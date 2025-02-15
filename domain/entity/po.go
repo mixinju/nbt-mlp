@@ -35,11 +35,16 @@ type User struct {
     Containers  []Container `json:"containers,omitempty" gorm:"foreignKey:UserID"`                       // 一个用户可以有多个容器
 }
 
-// AccessGroup 用户组
+// AccessGroup 用户组  应该包含更多的信息
 type AccessGroup struct {
-    ID     uint64 `gorm:"primaryKey"`       // 用户组ID
-    UserID uint64 `gorm:"not null"`         // 用户ID
-    Name   string `gorm:"type:varchar(20)"` // 用户组名称
+    ID      uint64  `gorm:"primaryKey"`       // 用户组ID
+    UserID  uint64  `gorm:"not null"`         // 用户ID
+    Name    string  `gorm:"type:varchar(20)"` // 用户组名称
+    Access  uint8   `gorm:"default:0"`        // 用户组权限码
+    GPUType GPUType `gorm:"type:uint8"`       // GPU类型
+    MaxPod  uint8   // 最大Pod数量
+    MaxMem  uint64  // 最大内存
+    MaxCore uint8   // 最大核心数量
 }
 
 // Container 运行的容器
@@ -81,6 +86,10 @@ func (u *User) Check() error {
     return nil
 }
 
+// ResourceCheck 持有资源校验器
+func (u *User) ResourceCheck() error {
+
+}
 func (c *Container) ObjectMeta() meta.ObjectMeta {
     return meta.ObjectMeta{
         Namespace: c.NameSpace,

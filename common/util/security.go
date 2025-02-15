@@ -3,6 +3,7 @@ package util
 import (
     "strconv"
 
+    "github.com/gin-gonic/gin"
     "golang.org/x/crypto/bcrypt"
 )
 
@@ -36,4 +37,10 @@ func PasswordValid(password string) bool {
         return false
     }
     return true
+}
+
+// GetUserId 从 gin.Context 中获取 userId,中间件已经将解析的userId放在gin.Context中
+func GetUserId(c *gin.Context) (uint64, error) {
+    userId, _ := c.Get("userId")
+    return strconv.ParseUint(userId.(string), 10, 64)
 }
