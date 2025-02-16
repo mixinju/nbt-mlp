@@ -21,7 +21,7 @@ func TestBatchSave(t *testing.T) {
 
 func TestSave(t *testing.T) {
     user := entity.User{
-        ID: 210001, Name: "扈书豪", ClassName: "计算机221",
+        ID: 3200421039, Name: "米新举", ClassName: "计算机206",
     }
 
     us := NewUserAppImpl()

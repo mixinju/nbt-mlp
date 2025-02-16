@@ -25,6 +25,7 @@ type PodApp struct {
 var _ ContainerAppIface = &PodApp{}
 
 func NewPodApp() *PodApp {
+    config.K8ConfigPath = "/Users/mixinju/.kube/config"
     k8sConfig, err := clientcmd.BuildConfigFromFlags("", config.K8ConfigPath)
     if err != nil {
         panic("读取k8s配置文件失败")

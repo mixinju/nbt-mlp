@@ -41,7 +41,7 @@ type AccessGroup struct {
     UserID  uint64  `gorm:"not null"`         // 用户ID
     Name    string  `gorm:"type:varchar(20)"` // 用户组名称
     Access  uint8   `gorm:"default:0"`        // 用户组权限码
-    GPUType GPUType `gorm:"type:uint8"`       // GPU类型
+    GPUType GPUType `gorm:"type:TINYINT"`     // GPU类型
     MaxPod  uint8   // 最大Pod数量
     MaxMem  uint64  // 最大内存
     MaxCore uint8   // 最大核心数量
@@ -88,7 +88,15 @@ func (u *User) Check() error {
 
 // ResourceCheck 持有资源校验器
 func (u *User) ResourceCheck() error {
+    // 遍历整个,计算不同namespace 下的资源使用情况
 
+    // 已持有的资源和预申请的资源相加
+
+    // 比较是否超过了最大资源限制
+
+    // 如果超出,返回超出错误,未超出返回nil
+
+    panic("implement me!!!")
 }
 func (c *Container) ObjectMeta() meta.ObjectMeta {
     return meta.ObjectMeta{

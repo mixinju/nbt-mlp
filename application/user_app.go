@@ -120,7 +120,7 @@ func (u *UserAppImpl) Update(ut entity.User) *errno.Errno {
 func (u *UserAppImpl) Save(ut entity.User) *errno.Errno {
     // 先校验基本参数是否缺失
     // 这部分放到 entity.User 处理
-    if ut.ID == 0 || len(ut.Name) == 0 || len(ut.ClassName) == 0 {
+    if ut.Check() != nil {
         log.Error("注册用户失败: 缺少必要的参数")
     }
 
@@ -128,10 +128,11 @@ func (u *UserAppImpl) Save(ut entity.User) *errno.Errno {
 
     // 自动生成密码-默认密码:学号添加姓名拼音
     defaultPassword := generateDefaultPassword(ut.ID, ut.Name)
-    ut.Password, _ = util.HashPassword(defaultPassword)
-    log.Info("生成默认密码", zap.String("password", ut.Password))
+    log.Info("默认密码:", zap.String("default password", defaultPassword))
 
-    // $2a$10$MBT36F3XF00SxFb5yfnWL.HnOzfys3ccbyktRbNgzz6y1O6llTaNi
+    ut.Password, _ = util.HashPassword(defaultPassword)
+    log.Info("加密后密码", zap.String("password", ut.Password))
+
     // 如果密码长度不符合要求,则返回错误
 
     // 其他注册逻辑...
