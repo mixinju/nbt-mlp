@@ -120,8 +120,8 @@ func (u *UserAppImpl) Update(ut entity.User) *errno.Errno {
 func (u *UserAppImpl) Save(ut entity.User) *errno.Errno {
     // 先校验基本参数是否缺失
     // 这部分放到 entity.User 处理
-    if ut.Check() != nil {
-        log.Error("注册用户失败: 缺少必要的参数")
+    if ut.ID == 0 || len(ut.Name) == 0 || len(ut.ClassName) == 0 {
+        log.Error("注册用户失败: 缺少必要的参数{学号,姓名,班级}")
     }
 
     // 检查对应的学号是否存在
@@ -203,6 +203,10 @@ func (u *UserAppImpl) ReadFromExcelFile(filePath string) ([]entity.User, *errno.
 
     result := make([]entity.User, 0, len(rows)-1)
     for index, row := range rows {
+        // 跳过表头
+        if index == 0 {
+            continue
+        }
         u, e := resolveUser(row, index)
         if e != nil {
             log.Sugar().Errorf("解析单个用户信息失败:文件路径{%s};原始数据 {%s};错误信息:{%s}", filePath, row, e.Error())

@@ -40,4 +40,5 @@ func ErrorWithMessage(err *errno.Errno, message string) Response {
 type Login struct {
     UserID uint64 `json:"user_id"`
     Token  string `json:"token"`
+    Code   int    `json:"code"`
 }
